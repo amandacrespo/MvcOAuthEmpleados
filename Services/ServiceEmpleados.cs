@@ -110,5 +110,38 @@ namespace MvcOAuthEmpleados.Services
             Empleado empleado = await CallApiAsync<Empleado>(request, token);
             return empleado;
         }
+
+        public async Task<List<string>> GetOficiosAsync() {
+            string request = "api/empleados/oficios";
+            List<string> oficios = await CallApiAsync<List<string>>(request);
+            return oficios;
+        }
+
+        public string TransformarOficios(List<string> oficios) {
+            string oficiosString = "";
+            foreach (string oficio in oficios) {
+                oficiosString += "oficios=" + oficio + "&";
+            }
+            oficiosString = oficiosString.TrimEnd('&');
+            return oficiosString;
+        }
+
+        public async Task<List<Empleado>> GetEmpleadosOficioAsync(List<string> oficios) {
+            string request = "api/empleados/empleadosoficio?";
+            request += this.TransformarOficios(oficios);
+            List<Empleado> empleados = await CallApiAsync<List<Empleado>>(request);
+            return empleados;
+        }
+
+        public async Task UpdateEmpleadosOficiosAsync(int incremento, List<string> oficios) {
+            string request = "api/empleados/incrementarsalarios/"+incremento+"?";
+            request += this.TransformarOficios(oficios);
+            using (HttpClient client = new HttpClient()) {
+                client.BaseAddress = new Uri(UrlApi);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(this.Header);
+                HttpResponseMessage response = await client.PutAsync(request, null);
+            }
+        }
     }
 }
